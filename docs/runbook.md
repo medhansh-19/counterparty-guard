@@ -40,3 +40,8 @@ Required chain key arrangement: the agent has one function-call key scoped to th
 If scorer credentials leak, stop the service, have the independent owner pause/rotate scorer and policy on B's vault, revoke affected API credentials through an explicit registration migration/rotation procedure, and reassess after recovery. Deleting a local key does not revoke already issued permits. Do not delete the database to solve uncertain accounting. The current registry deliberately refuses overwriting an existing identity with different credentials; production credential lifecycle management is outside this local MVP and must be implemented deliberately if needed.
 
 After B/C integration, run full S1–S10 and allowance/recovery drills with actual logs. A-only `test:e2e`/demo entry points exit nonzero naming the missing integrations. Do not claim those gates passed until their actual output supports it.
+
+
+## Person B local enforcement update
+
+The B contracts/SDK and separate owner/recovery CLI now exist. `pnpm test:e2e` and `pnpm demo:all` run the real local sandbox gate; `pnpm demo:fixtures` retains the original assessment-only runner. See [the chain guide](../scripts/chain/README.md) for exact setup, finite key permissions, owner warning approval, pending accounting and recovery. The standalone fixture server above still performs no chain deployment/funding; a custom live composition must explicitly inject the verified policy/finality adapters and real source credentials.

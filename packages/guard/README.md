@@ -1,7 +1,23 @@
-# packages/guard
+# Guarded SDK
 
-Owner: **B; A reviews enforcement integration**.
+Server-side TypeScript signer boundary owned by B. Use the canonical shared action/check/permit types and inject `AssessmentClient`, `ChainReader`, `GuardSigner` and `AttemptStore` into `Guard`. Node crypto and agent credentials must remain outside browser bundles and model prompts.
 
-Guarded payment/call tools, signer boundary and warning-resume flow.
+`Guard.execute(request)` refuses block/errors before signing, verifies the scorer signature and every environment/action binding, checks finalized execution/approval state, revalidates the assessment and active vault policy, and checks expiry again immediately before signing. A warning throws `WarningApprovalRequired` containing its signed permit. Resume the **same request ID** only after the separate owner process approves that exact hash on chain. A browser Boolean is never an input.
 
-Status: planning marker only; no implementation or passing tests are implied. See [the implementation plan](../../PLAN.md) and the root ownership rules before adding code.
+`NearRestrictedSigner` reconstructs a NEAR v0 Borsh transaction containing exactly one zero-deposit `vault.execute` action. It inspects the actual finalized access key and requires a finite, nonzero allowance, exact receiver and `method_names=["execute"]`. It holds only the agent key. Its required fourth constructor argument is a durable `TransactionNonceStore` (implemented by `SqliteAttemptStore`). Every process using an access key must share that nonce database. The signer reserves `finalized_nonce + 1` atomically and uses a ten-second contention deadline while waiting for any earlier reservation to appear consumed in finalized chain state before signing another transaction (individual RPC calls retain their transport timeout). Merely allocating increasing nonces would still allow out-of-order submission to invalidate an earlier payment. `NearChainReader` verifies finalized deployment/role/policy bindings; its `getPolicy` implements A's injected policy provider. RPC transport is trusted infrastructure; configure the intended endpoint and deployment. HTTPS is required for remote endpoints. No mainnet network is supported.
+
+Use `SqliteAttemptStore` for durable cross-process claims. `MemoryAttemptStore` is for isolated tests/tools only. The claim is committed before entering the signer. A signing exception, network timeout or process failure stays uncertain and cannot automatically sign again or mint a new permit. Successful submission also remains locked. `SigningUnavailable` from `sign()` guarantees no signature was produced: nonce contention or expiry before signing releases only that request claim, allowing an explicit retry of the same request. Any error after signing retains the claim. Nonce reservations never expire by time; a crash or uncertain submission can block further signing for that key. Reconcile the original transaction; if its consumption cannot be established and submission cannot safely be completed, use the independent key-replacement recovery procedure. Never delete the nonce database to resume signing. Inspect the stored transaction ID and on-chain nonce; recovery requires explicit operator reconciliation. Do not delete an unresolved claim to retry. `signed=true` means signing returned transaction bytes. `submitted=true` means the RPC acknowledged submission; false after an uncertain exception does not prove that nothing reached the network.
+
+`NearExecutionProvider` resolves check/permit/transaction bindings from trusted storage. It verifies the original transaction and exact permit, the vault reservation event, direct target receipt, supported finalized operation result, vault terminal state, approval reference and **the operation's execution block**, then supplies A's `ExecutionObservation`. It never treats a parent transaction or polling head as payment success. Unknown finality stays uncertain; a missing callback stays pending. Only the actual failed initial target receipt proves nonexecution. The API can record that proof while the vault conservatively retains a failed-call reservation, because an on-chain callback alone cannot exclude a failed returned-promise chain. See the availability limitation in the vault README. The integration suite also checks A's SQLite reconciliation and historical code baseline.
+
+```ts
+const attempts = new SqliteAttemptStore('/private/agent-attempts.sqlite');
+const restrictedSigner = new NearRestrictedSigner(rpc, config, agentKey, attempts);
+const guard = new Guard(config, new HttpAssessmentClient(apiUrl, agentToken),
+  chainReader, restrictedSigner, attempts);
+await guard.execute(request); // catch WarningApprovalRequired and send its public permit to the owner
+```
+
+Run `pnpm test`, `pnpm typecheck`, and `pnpm test:e2e`. The real API/reputation/SDK sandbox driver is `scripts/chain/sdk-driver.ts`; its credentials arrive on stdin from an isolated test process. Owner credentials never enter that driver.
+
+Remaining race: an already valid permit can still be submitted after off-chain code/blocklist changes and before expiry or on-chain revocation. The SDK revalidates; the vault cannot atomically query those external facts. See [vault limits](../../contracts/vault/README.md) and [key/recovery runbook](../../scripts/chain/README.md).

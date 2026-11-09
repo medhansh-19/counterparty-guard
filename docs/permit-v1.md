@@ -1,6 +1,6 @@
 # Execution permit v1
 
-Status: TypeScript implementation and public golden vectors available. **Rust/vault equivalence and independent enforcement remain pending Person B's implementation/review.** No contract execution is claimed by these tests.
+Status: TypeScript and Rust implementations match all four committed golden vectors. Real local sandbox tests verify independent vault enforcement; funded testnet validation and human owner review remain separate gates. See [B’s handoff](person-b-handoff.md).
 
 ## Transport and bounds
 
@@ -8,7 +8,7 @@ Status: TypeScript implementation and public golden vectors available. **Rust/va
 
 Account IDs use NEAR's lowercase 2–64 byte account shape. The Ed25519 public-key representation is `ed25519:<canonical base58 raw-32-bytes>`; unsupported key schemes fail. Deployment-instance ID, evidence-snapshot hash and nonce are 32-byte values represented by 64 lowercase hex digits in JSON. Generate the deployment instance and nonce using cryptographic randomness; do not reuse a deployment identity across reset/redeployment.
 
-Only `transfer_near` and `contract_call` are encoded. Contract calls contain the exact decoded argument bytes, not a reserialized equivalent JSON object. Arguments are canonical base64 with at most 4,096 decoded bytes. Method names are bounded to 64 ASCII identifier characters; gas is 1–300 Tgas. The configured v1 call policy currently supports the `memo-v1` argument shape `{ "memo": string<=256 }`; Person B must confirm the target/method and gas/argument enforcement before integration. The shared action codec alone does not grant arbitrary call authority.
+Only `transfer_near` and `contract_call` are encoded. Contract calls contain the exact decoded argument bytes, not a reserialized equivalent JSON object. Arguments are canonical base64 with at most 4,096 decoded bytes. Method names are bounded to 64 ASCII identifier characters; gas is 1–300 Tgas. The configured v1 call policy currently supports the `memo-v1` argument shape `{ "memo": string<=256 }`; The vault supports the configured project fixture’s `record` method, enforces the literal `memo` key independently and caps configured target gas at 150 Tgas to leave execution/callback headroom. The shared action codec alone does not grant arbitrary call authority.
 
 Maximum encoded permit size is 8,192 bytes. Maximum permit lifetime is 300,000 ms; the API default is configured separately (normally 120,000 ms). Expiry must be strictly later than issue time. Both JSON and binary decoders enforce these bounds; the decoder rejects malformed UTF-8, unknown enum tags, oversized declared vectors, truncated data and trailing bytes.
 
@@ -68,7 +68,7 @@ pnpm exec vitest run packages/shared/test/codec.test.ts
 pnpm typecheck
 ```
 
-Tests validate published vectors, both action variants, full field mutations, method/argument/deposit/gas mutations, malformed/trailing/truncated bytes, unknown variants, bounds, canonical public keys/base64 and expiry. Person B must implement the identical field order/signing message in Rust and check every vector before any vault integration is treated as complete. Freeze further incompatible changes behind a version bump, updated vectors, and a migration/rollout decision.
+Tests validate published vectors, both action variants, full field mutations, method/argument/deposit/gas mutations, malformed/trailing/truncated bytes, unknown variants, bounds, canonical public keys/base64 and expiry. Rust now implements the identical field order/signing message and checks every vector, including every one-byte mutation and truncation. Run `cargo test -p counterparty-vault --locked` and `pnpm test:e2e`. Freeze further incompatible changes behind a version bump, updated vectors, and a migration/rollout decision.
 
 ## Limits preserved
 

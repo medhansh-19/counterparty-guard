@@ -61,7 +61,19 @@ export function ApiCheckView() {
     {result && <article className="space-y-3 border border-slate-700 rounded p-4">
       <h2 className="text-lg font-semibold">{result.decision.toUpperCase()} · {result.source_mode}</h2>
       <p>Expires {new Date(result.expires_at).toISOString()}</p>
-      {result.decision === 'warn' && <p className="text-amber-300">Independent owner approval of this exact permit is required. Vault/owner CLI integration remains pending; no approval is sent from this browser.</p>}
+      {result.decision === 'warn' && result.permit && <div className="space-y-2 text-amber-300">
+        <p>Independent owner approval of this exact permit is required. Verify the receiver, amount, expiry and scorer key against your deployment. No approval is sent from this browser.</p>
+        <p>Save the request below outside the repository, set your RPC endpoint and private owner credential file path, then run:</p>
+        <code className="block overflow-auto text-xs">pnpm exec tsx scripts/chain/admin.ts /private/approve-warning-request.json</code>
+        <details><summary>Owner CLI request for this exact permit</summary><pre className="overflow-auto text-xs">{JSON.stringify({
+          network: result.permit.payload.network,
+          rpc_url: result.permit.payload.network === 'testnet' ? 'https://rpc.testnet.near.org' : 'http://127.0.0.1:REPLACE_WITH_SANDBOX_PORT',
+          vault_id: result.permit.payload.vault_id,
+          credential_file: '/private/owner-credentials.json',
+          request: { operation: 'approve_warn', scorer_public_key: result.permit.scorer_public_key, permit: result.permit },
+        }, null, 2)}</pre></details>
+        <p>After finalized approval, resume the original SDK request. If it expires, reassess and approve the new exact permit.</p>
+      </div>}
       {result.reasons.map((item, index) => <p key={index}>{item}</p>)}
       <details><summary>Exact assessment and signed permit</summary><pre className="overflow-auto text-xs">{JSON.stringify(result, null, 2)}</pre></details>
       <details><summary>Retained evidence and source freshness</summary><pre className="overflow-auto text-xs">{JSON.stringify(evidence, null, 2)}</pre></details>

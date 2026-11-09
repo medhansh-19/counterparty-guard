@@ -34,6 +34,9 @@
       ],
       "@counterparty-guard/shared/browser": [
         "packages/shared/src/browser.ts"
+      ],
+      "@counterparty-guard/guard": [
+        "packages/guard/src/index.ts"
       ]
     }
   },
@@ -48,7 +51,10 @@
     "packages/reputation/**/*.ts",
     "fixtures/**/*.ts",
     "scripts/demo/**/*.ts",
-    "tests/regression/**/*.ts"
+    "tests/regression/**/*.ts",
+    "packages/guard/**/*.ts",
+    "scripts/chain/**/*.ts",
+    "tests/e2e/**/*.ts"
   ],
   "exclude": [
     "node_modules",

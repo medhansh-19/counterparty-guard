@@ -489,3 +489,8 @@ Pin the scoring binary/version, configuration, and input snapshot hashes. Verify
 - [ ] No secrets, invented receipts, fabricated logs, or unsupported safety/novelty claims.
 
 Final pitch: **“Before your agent pays, check the receiver—and check whether their reputation was manufactured.”**
+
+
+## Person B delivery status (9 November 2026)
+
+The eight three-hour allocations remain unchanged (24 planned active hours). Packages1–5 and7 have implementations and local tests: Rust vault/fixture, matching permit vectors, guarded transfers/calls, finite restricted key, exact owner warning approval, conservative budgets, durable SDK retries and adversarial controls. Package6 includes actual failed-target/recovery sandbox drills and testnet deployment/setup tooling; funded testnet deployment is unverified because no project-owned deployment credentials/accounts are configured. Package8 supplies key/contract/recovery docs, real sandbox attack/receipt evidence, and a C demo/approval handoff review; independent human review of this PR remains pending. See `docs/person-b-handoff.md` for reproduction and limits. No elapsed work estimates are presented as measured hours.

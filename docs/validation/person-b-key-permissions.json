@@ -1,0 +1,19 @@
+{
+  "network": "sandbox",
+  "account_id": "dev-20261109114934-59447701419087.test.near",
+  "public_key": "ed25519:DqedtY8TB5ZbadA4AVdTqMPhLcrZdKATXERojUSJrL2G",
+  "result": {
+    "block_hash": "21snA1qkSCZTSrYhQ4YD8pUiH7mVTNVhv94P27XLzR7H",
+    "block_height": 30,
+    "nonce": 20000000,
+    "permission": {
+      "FunctionCall": {
+        "allowance": "1000000000000000000000000",
+        "method_names": [
+          "execute"
+        ],
+        "receiver_id": "dev-20261109114935-50422373716309.test.near"
+      }
+    }
+  }
+}

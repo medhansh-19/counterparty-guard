@@ -1,0 +1,20 @@
+[package]
+name = "counterparty-vault"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+near-sdk.workspace = true
+borsh.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+hex.workspace = true
+
+[dev-dependencies]
+near-sdk = { workspace = true, features = ["unit-testing"] }
+base64.workspace = true
+ed25519-dalek = "=2.2.0"

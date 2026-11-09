@@ -13,15 +13,18 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.c-tests.json && pnpm --filter web typecheck",
     "test": "vitest run --config vitest.config.ts",
     "test:integration": "vitest run --config vitest.integration.config.ts",
-    "test:e2e": "tsx scripts/person-a/unavailable.ts e2e",
+    "test:e2e": "bash scripts/chain/test.sh",
     "demo:attack": "tsx scripts/demo/run-attack.ts",
-    "demo:all": "tsx scripts/demo/run-all.ts",
+    "demo:all": "bash scripts/chain/demo-all.sh",
     "dev:api": "tsx apps/api/src/server.ts",
     "setup:local": "tsx scripts/person-a/setup-local.ts",
     "smoke:api": "tsx scripts/person-a/smoke.ts",
     "verify:interfaces": "tsx scripts/person-a/verify-interfaces.ts",
     "dev:web": "pnpm --filter web dev",
-    "build": "pnpm --filter web build"
+    "build": "pnpm --filter web build",
+    "test:contracts": "bash scripts/chain/test.sh",
+    "demo:fixtures": "tsx scripts/demo/run-all.ts",
+    "demo:sandbox": "bash scripts/chain/test.sh"
   },
   "devDependencies": {
     "@types/better-sqlite3": "9.6.0",

@@ -1,10 +1,10 @@
 # Counterparty Guard
 
-[Public repository](https://github.com/medhansh-19/counterparty-guard) · NEAR testnet/local sandbox · TypeScript/pnpm · API and reputation integration
+[Public repository](https://github.com/medhansh-19/counterparty-guard) · NEAR testnet/local sandbox · TypeScript/pnpm · Rust vault · API and reputation integration
 
 Before an AI agent pays, assess the exact receiver and action. Return `allow`, `warn` or `block` with retained evidence, stable reasons and source freshness. Eligible actions receive a signed, expiring, single-use permit for B’s independently enforcing vault.
 
-**Person A is implemented:** authenticated Fastify API, SQLite migrations/persistence, strict shared schemas and deterministic Borsh codec, provider adapters, deterministic scoring, pre-sign revalidation and trusted execution-reconciliation interfaces. C’s signed reports, reviewer audit, bounded graph features, dashboard and fixture assessment demo are integrated. B’s contracts/SDK remain a separate PR. No chain payment or vault enforcement is claimed by this backend alone.
+**Person A is implemented:** authenticated Fastify API, SQLite migrations/persistence, strict shared schemas and deterministic Borsh codec, provider adapters, deterministic scoring, pre-sign revalidation and trusted execution-reconciliation interfaces. C’s signed reports, reviewer audit, bounded graph features, dashboard and fixture assessment demo are integrated. B’s Rust vault, guarded SDK, independent owner CLI, restricted-key setup and finalized receipt adapter are implemented and exercised in a real local sandbox. Age/activity/reputation fixtures remain visibly synthetic; no live testnet payment is claimed.
 
 ## Run locally
 
@@ -33,7 +33,9 @@ pnpm smoke:api
 pnpm audit --prod
 ```
 
-`pnpm demo:attack` runs an actual scripted prompt-injection tool call against A+C’s fixture assessment path; its JSONL contains a real decision and no agent signature/submission. `pnpm demo:all -- --scenario S1` demonstrates a legitimate allow assessment with a real service-signed permit and no chain execution. Full `pnpm demo:all` exits nonzero because S8 requires B’s vault/replay enforcement; sandbox/testnet adapters also explicitly report unavailable and never relabel simulations as chain execution. `pnpm test:e2e` remains unavailable until B’s key/approval/budget/receipt flows exist. See [demo scope and reproduction](docs/demo.md).
+`pnpm test:e2e` (also `pnpm demo:all` / `pnpm demo:sandbox`) builds both Wasm contracts and runs the real API/reputation/SDK sandbox flow plus direct vault/key/replay/budget/recovery tests. Install rustup first; `rustup show` installs the pinned Rust/Wasm components. See the [chain setup and recovery guide](scripts/chain/README.md) for native requirements and exact commands. Actual receipt/key-permission logs are retained under ignored `artifacts/local/`.
+
+`pnpm demo:attack` runs C’s scripted injection through fixture assessments; the full sandbox suite also runs it through B’s real signer boundary and proves no signature/submission on block. `pnpm demo:fixtures -- --scenario S1` preserves the assessment-only runner and its flags, as does `demo:all` when given explicit fixture flags. The original full fixture runner still labels its unexecuted S8 case unavailable; the real S8 gate is in `test:e2e`. Testnet tooling is provided separately; no funded-network result is inferred from sandbox tests.
 
 ## Dashboard and report review
 
@@ -70,15 +72,15 @@ Use `createApp` to assemble live providers with trusted B policy/finality and C 
 
 ## Security boundaries
 
-`block` has no permit. `warn` never grants automatic signing authority; B’s vault must verify the owner’s approval of the exact permit hash. Missing mandatory current-state/reputation/policy/storage produces a typed non-success response without a permit. Reviewed active block entries override positive history; raw report counts cannot manufacture a hard block. Indexed activity earns no live independence credit until a justified independent-activity adapter is implemented; current live independence credit is conservative zero.
+`block` has no permit. `warn` never grants automatic signing authority; the vault independently verifies the owner’s approval of the exact permit hash. Missing mandatory current-state/reputation/policy/storage produces a typed non-success response without a permit. Reviewed active block entries override positive history; raw report counts cannot manufacture a hard block. Indexed activity earns no live independence credit until a justified independent-activity adapter is implemented; current live independence credit is conservative zero.
 
 The agent must receive only a function-call key restricted to the vault’s `execute` method with zero attached deposit. The prefunded vault supplies payment value. The owner/recovery key stays outside the agent runtime. Gas allowance is separate from payment limits; topping up the account does not replenish it, and an existing key’s allowance cannot be edited. Replace an exhausted key through the external recovery path; retain explicit method restrictions and a finite allowance. See [NEAR access-key restrictions and caveats](https://docs.near.org/protocol/accounts-contracts/access-keys).
 
-The vault cannot atomically inspect another contract’s latest code or the service’s latest blocklist. Short expiry, SDK revalidation and emergency pause reduce a bounded race; they do not remove it. B must independently enforce signature origin, complete action binding, expiry, nonce, policy, warning approval, budgets and conservative pending accounting. Rust/TypeScript byte equality and B/C owner review remain integration gates.
+The vault cannot atomically inspect another contract’s latest code or the service’s latest blocklist. Short expiry, SDK revalidation and emergency pause reduce a bounded race; they do not remove it. The vault independently enforces signature origin, complete action binding, expiry, nonce, policy, warning approval, budgets and conservative pending accounting. Rust matches all four TypeScript golden vectors. Human A/B/C code review and any funded testnet validation remain separate gates.
 
 ## Ownership and documentation
 
-Medhansh is **Person A**: API (except report routes), shared TypeScript, providers, scoring, core DB, root JS tooling/lockfile and README. B owns contracts, guarded SDK and chain scripts; C owns reports/reputation, dashboard, fixtures and demo. C’s contribution is now connected through A’s report-plugin and reputation-provider interfaces. B owns the remaining chain execution gates.
+Medhansh is **Person A**: API (except report routes), shared TypeScript, providers, scoring, core DB, root JS tooling/lockfile and README. B owns contracts, guarded SDK and chain scripts; C owns reports/reputation, dashboard, fixtures and demo. C’s contribution is now connected through A’s report-plugin and reputation-provider interfaces. B’s implementation includes local chain execution; production/testnet composition and independent human review remain explicit handoff gates.
 
 - [Product scope and equal-effort plan](PLAN.md)
 - [Person A package plan](docs/person-a-plan.md)
@@ -92,3 +94,7 @@ Medhansh is **Person A**: API (except report routes), shared TypeScript, provide
 - [Person A handoff](docs/person-a-handoff.md)
 - [Repository workflow](docs/repository-workflow.md)
 - [Architecture decisions](docs/decisions.md)
+
+- [Person B handoff, validation and known limits](docs/person-b-handoff.md)
+- [Vault enforcement and exact build commands](contracts/vault/README.md)
+- [Restricted-key setup, owner approval and recovery](scripts/chain/README.md)

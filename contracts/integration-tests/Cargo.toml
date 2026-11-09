@@ -1,0 +1,21 @@
+[package]
+name = "chain-integration"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+publish = false
+
+[dev-dependencies]
+near-workspaces = "=0.24.0"
+tokio = { version = "=1.52.0", features = ["macros", "rt-multi-thread"] }
+anyhow = "=1.0.102"
+serde.workspace = true
+serde_json.workspace = true
+borsh.workspace = true
+base64.workspace = true
+hex.workspace = true
+ed25519-dalek = "=2.2.0"
+sha2 = "=0.10.9"
+near-sdk = { workspace = true, features = ["unit-testing"] }
+counterparty-vault = { path = "../vault" }
+getrandom = "=0.4.3"
